@@ -30,9 +30,7 @@ class AudioRecorderViewModel: NSObject, ObservableObject {
     private let workflowEndpoint = "https://api.dify.ai/v1/workflows/run"
     
     var formattedTime: String {
-        let minutes = Int(recordingTime) / 60
-        let seconds = Int(recordingTime) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        TimeFormatter.format(recordingTime)
     }
     
     var statusText: String {

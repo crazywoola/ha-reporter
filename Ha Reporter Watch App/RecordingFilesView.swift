@@ -14,157 +14,35 @@ struct RecordingFilesView: View {
     @ObservedObject var audioRecorder: AudioRecorderViewModel
     @StateObject private var audioPlayer = AudioPlayerViewModel()
     
-    // Banana theme colors
-    private let bananaYellow = Color(red: 1.0, green: 0.87, blue: 0.0)
-    private let bananaBrown = Color(red: 0.4, green: 0.3, blue: 0.1)
-    
     var body: some View {
-        ZStack {
-            // Banana gradient background
-            LinearGradient(
-                colors: [
-                    Color(red: 0.15, green: 0.12, blue: 0.0),
-                    Color.black
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-            
-            ScrollView {
+        ScrollView {
                 VStack(spacing: 16) {
-                    // Upload status banner
-                    if let message = audioRecorder.uploadMessage {
-                        HStack(spacing: 8) {
-                            // Icon aligned with play button
-                            ZStack {
-                                Circle()
-                                    .fill((audioRecorder.uploadSuccess ? bananaYellow : Color.red).opacity(0.2))
-                                    .frame(width: 32, height: 32)
-                                
-                                if audioRecorder.isUploading {
-                                    ProgressView()
-                                        .scaleEffect(0.6)
-                                        .tint(bananaYellow)
-                                } else {
-                                    Image(systemName: audioRecorder.uploadSuccess ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                        .font(.system(size: 12))
-                                        .foregroundStyle(audioRecorder.uploadSuccess ? bananaYellow : .red)
-                                }
-                            }
-                            
-                            Text(message)
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundStyle(audioRecorder.uploadSuccess ? bananaYellow : .red)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            
-                            Spacer()
-                        }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill((audioRecorder.uploadSuccess ? bananaYellow : Color.red).opacity(0.15))
-                        )
-                        .padding(.horizontal, 4)
-                    }
-                    
-                    // Current Recording Section
-                    if let currentURL = audioRecorder.getCurrentRecordingURL() {
-                        VStack(spacing: 6) {
-                            HStack(spacing: 4) {
-                                Text("🍌")
-                                    .font(.system(size: 12))
-                                Text("Current")
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .foregroundStyle(bananaYellow)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 4)
-                            
-                            RecordingRow(
-                                url: currentURL,
-                                isPlaying: audioPlayer.isPlaying && audioPlayer.currentURL == currentURL,
-                                currentTime: audioPlayer.currentURL == currentURL ? audioPlayer.currentTime : 0,
-                                duration: audioPlayer.currentURL == currentURL ? audioPlayer.duration : nil,
-                                onPlayPause: {
-                                    handlePlayPause(url: currentURL)
-                                },
-                                onUpload: {
-                                    audioRecorder.uploadAudioFile(currentURL)
-                                },
-                                onDelete: nil,
-                                isUploading: audioRecorder.isUploading,
-                                isCurrent: true
-                            )
-                        }
-                    }
-                    
-                    // Saved Recordings Section
+                // Upload status banner
+                if let message = audioRecorder.uploadMessage {
+                        uploadBanner(message: message)
+                }
+                
+                // Current Recording Section
+                if let currentURL = audioRecorder.getCurrentRecordingURL() {
+                        currentRecordingSection(url: currentURL)
+                }
+                
+                // Saved Recordings Section
                     if !audioRecorder.savedRecordings.isEmpty {
-                        VStack(spacing: 6) {
-                            HStack(spacing: 4) {
-                                Text("📁")
-                                    .font(.system(size: 12))
-                                Text("Saved")
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .foregroundStyle(bananaYellow.opacity(0.8))
-                                Spacer()
-                                Text("\(audioRecorder.savedRecordings.count)")
-                                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                                    .foregroundStyle(bananaYellow)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(
-                                        Capsule()
-                                            .fill(bananaYellow.opacity(0.2))
-                                    )
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 4)
-                            
-                            ForEach(audioRecorder.savedRecordings, id: \.self) { url in
-                                RecordingRow(
-                                    url: url,
-                                    isPlaying: audioPlayer.isPlaying && audioPlayer.currentURL == url,
-                                    currentTime: audioPlayer.currentURL == url ? audioPlayer.currentTime : 0,
-                                    duration: audioPlayer.currentURL == url ? audioPlayer.duration : nil,
-                                    onPlayPause: {
-                                        handlePlayPause(url: url)
-                                    },
-                                    onUpload: {
-                                        audioRecorder.uploadAudioFile(url)
-                                    },
-                                    onDelete: {
-                                        deleteRecording(url: url)
-                                    },
-                                    isUploading: audioRecorder.isUploading,
-                                    isCurrent: false
-                                )
-                            }
-                        }
+                        savedRecordingsSection
                     }
                     
                     // Empty state
                     if audioRecorder.savedRecordings.isEmpty && audioRecorder.getCurrentRecordingURL() == nil {
-                        VStack(spacing: 8) {
-                            Text("🍌")
-                                .font(.system(size: 40))
-                                .opacity(0.5)
-                            Text("No recordings yet")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(bananaYellow.opacity(0.6))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 40)
-                    }
-                    
-                    // Delete All Button
-                    if !audioRecorder.savedRecordings.isEmpty {
-                        Button(role: .destructive) {
-                            audioPlayer.stop()
-                            audioRecorder.deleteAllRecordings()
-                        } label: {
+                        emptyStateView
+                }
+                
+                // Delete All Button
+                if !audioRecorder.savedRecordings.isEmpty {
+                    Button(role: .destructive) {
+                        audioPlayer.stop()
+                        audioRecorder.deleteAllRecordings()
+                    } label: {
                             HStack(spacing: 4) {
                                 Image(systemName: "trash.fill")
                                     .font(.system(size: 10))
@@ -187,22 +65,102 @@ struct RecordingFilesView: View {
                 .padding(.horizontal, 4)
             }
         }
+        .bananaBackground()
         .navigationTitle("Recordings")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            audioRecorder.loadSavedRecordings()
+        .onAppear(perform: audioRecorder.loadSavedRecordings)
+        .onDisappear(perform: audioPlayer.stop)
+    }
+    
+    // MARK: - View Components
+    
+    private func uploadBanner(message: String) -> some View {
+        let isSuccess = audioRecorder.uploadSuccess
+        let color = isSuccess ? BananaTheme.yellow : Color.red
+        
+        return HStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.2))
+                    .frame(width: 32, height: 32)
+                
+                if audioRecorder.isUploading {
+                    ProgressView()
+                        .scaleEffect(0.6)
+                        .tint(BananaTheme.yellow)
+                } else {
+                    Image(systemName: isSuccess ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(color)
+                }
+            }
+            
+            Text(message)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(color)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Spacer()
         }
-        .onDisappear {
-            audioPlayer.stop()
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(RoundedRectangle(cornerRadius: 12).fill(color.opacity(0.15)))
+        .padding(.horizontal, 4)
+    }
+    
+    private func currentRecordingSection(url: URL) -> some View {
+        VStack(spacing: 6) {
+            SectionHeader(emoji: "🍌", title: "Current")
+                .padding(.horizontal, 4)
+            
+            recordingRow(for: url, isCurrent: true)
         }
     }
     
-    private func handlePlayPause(url: URL) {
-        if audioPlayer.currentURL == url && audioPlayer.isPlaying {
-            audioPlayer.pause()
-        } else {
-            audioPlayer.play(url: url)
+    private var savedRecordingsSection: some View {
+        VStack(spacing: 6) {
+            SectionHeader(emoji: "📁", title: "Saved", count: audioRecorder.savedRecordings.count)
+                .padding(.horizontal, 4)
+            
+            ForEach(audioRecorder.savedRecordings, id: \.self) { url in
+                recordingRow(for: url, isCurrent: false)
+            }
         }
+    }
+    
+    private var emptyStateView: some View {
+        VStack(spacing: 8) {
+            Text("🍌")
+                .font(.system(size: 40))
+                .opacity(0.5)
+            Text("No recordings yet")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(BananaTheme.yellow.opacity(0.6))
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+    }
+    
+    private func recordingRow(for url: URL, isCurrent: Bool) -> some View {
+        RecordingRow(
+            url: url,
+            isPlaying: audioPlayer.isPlaying && audioPlayer.currentURL == url,
+            currentTime: audioPlayer.currentURL == url ? audioPlayer.currentTime : 0,
+            duration: audioPlayer.currentURL == url ? audioPlayer.duration : nil,
+            onPlayPause: { handlePlayPause(url: url) },
+            onUpload: { audioRecorder.uploadAudioFile(url) },
+            onDelete: isCurrent ? nil : { deleteRecording(url: url) },
+            isUploading: audioRecorder.isUploading,
+            isCurrent: isCurrent
+        )
+    }
+    
+    // MARK: - Actions
+    
+    private func handlePlayPause(url: URL) {
+        audioPlayer.currentURL == url && audioPlayer.isPlaying
+            ? audioPlayer.pause()
+            : audioPlayer.play(url: url)
     }
     
     private func deleteRecording(url: URL) {
@@ -225,148 +183,24 @@ struct RecordingRow: View {
     let isUploading: Bool
     let isCurrent: Bool
     
-    // Banana theme colors
-    private let bananaYellow = Color(red: 1.0, green: 0.87, blue: 0.0)
-    private let bananaBrown = Color(red: 0.4, green: 0.3, blue: 0.1)
-    
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
-                // Play/Pause button - consistent size
-                Button(action: onPlayPause) {
-                    ZStack {
-                        Circle()
-                            .fill(isPlaying ? bananaYellow.opacity(0.2) : bananaBrown.opacity(0.3))
-                            .frame(width: 32, height: 32)
-                        
-                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(isPlaying ? bananaYellow : bananaYellow.opacity(0.8))
-                    }
-                }
-                .buttonStyle(.plain)
-                .disabled(isUploading)
-                
-                // File info
-                VStack(spacing: 2) {
-                    // Duration
-                    if let duration = duration {
-                        Text(formatTime(duration))
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundStyle(bananaYellow)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    } else {
-                        Text("--:--")
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundStyle(bananaYellow.opacity(0.5))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    
-                    // File size
-                    if let size = try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize {
-                        Text(formatFileSize(size))
-                            .font(.system(size: 9, weight: .medium))
-                            .foregroundStyle(.gray)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
-                
+                playPauseButton
+                fileInfoView
                 Spacer()
-                
-                // Upload button - consistent size
-                Button(action: onUpload) {
-                    ZStack {
-                        Circle()
-                            .fill(bananaYellow.opacity(0.15))
-                            .frame(width: 28, height: 28)
-                        
-                        if isUploading {
-                            ProgressView()
-                                .scaleEffect(0.6)
-                                .tint(bananaYellow)
-                        } else {
-                            Image(systemName: "arrow.up.circle.fill")
-                                .font(.system(size: 12))
-                                .foregroundStyle(bananaYellow.opacity(0.9))
-                        }
-                    }
-                }
-                .buttonStyle(.plain)
-                .disabled(isUploading)
+                uploadButton
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
             
-            // Progress bar (if playing)
-            if isPlaying || currentTime > 0 {
-                VStack(spacing: 3) {
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            // Background
-                            RoundedRectangle(cornerRadius: 1.5)
-                                .fill(bananaBrown.opacity(0.3))
-                                .frame(height: 3)
-                            
-                            // Progress
-                            if let duration = duration, duration > 0 {
-                                RoundedRectangle(cornerRadius: 1.5)
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [bananaYellow, bananaYellow.opacity(0.8)],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                                    .frame(width: geometry.size.width * CGFloat(currentTime / duration), height: 3)
-                            }
-                        }
-                    }
-                    .frame(height: 3)
-                    
-                    // Time labels
-                    HStack {
-                        Text(formatTime(currentTime))
-                        Spacer()
-                        if let duration = duration {
-                            Text(formatTime(duration - currentTime))
-                        }
-                    }
-                    .font(.system(size: 8, weight: .medium, design: .rounded))
-                    .foregroundStyle(bananaYellow.opacity(0.7))
-                }
-                .padding(.horizontal, 10)
-                .padding(.bottom, 6)
+            if isPlaying || currentTime > 0, let duration = duration {
+                AudioProgressBar(currentTime: currentTime, duration: duration)
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 6)
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(
-                    isCurrent 
-                        ? LinearGradient(
-                            colors: [
-                                bananaYellow.opacity(0.12),
-                                bananaYellow.opacity(0.08)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                        : LinearGradient(
-                            colors: [
-                                bananaBrown.opacity(0.15),
-                                bananaBrown.opacity(0.1)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(
-                            isPlaying ? bananaYellow.opacity(0.4) : Color.clear,
-                            lineWidth: 1.5
-                        )
-                )
-        )
+        .background(cardBackground)
         .padding(.horizontal, 4)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             if let onDelete = onDelete {
@@ -377,19 +211,63 @@ struct RecordingRow: View {
         }
     }
     
-    private func formatFileSize(_ bytes: Int) -> String {
-        let kb = Double(bytes) / 1024
-        if kb < 1024 {
-            return String(format: "%.0f KB", kb)
-        }
-        let mb = kb / 1024
-        return String(format: "%.1f MB", mb)
+    // MARK: - View Components
+    
+    private var playPauseButton: some View {
+        CircularIconButton(
+            icon: isPlaying ? "pause.fill" : "play.fill",
+            size: 32,
+            backgroundColor: isPlaying ? BananaTheme.yellow.opacity(0.2) : BananaTheme.brown.opacity(0.3),
+            foregroundColor: isPlaying ? BananaTheme.yellow : BananaTheme.yellow.opacity(0.8),
+            isDisabled: isUploading,
+            action: onPlayPause
+        )
     }
     
-    private func formatTime(_ time: TimeInterval) -> String {
-        let minutes = Int(time) / 60
-        let seconds = Int(time) % 60
-        return String(format: "%d:%02d", minutes, seconds)
+    private var fileInfoView: some View {
+        VStack(spacing: 2) {
+            Text(duration.map { TimeFormatter.formatCompact($0) } ?? "--:--")
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundStyle(BananaTheme.yellow.opacity(duration == nil ? 0.5 : 1.0))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            if let size = url.fileSize {
+                Text(FileSizeFormatter.format(size))
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundStyle(.gray)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+    
+    private var uploadButton: some View {
+        CircularIconButton(
+            icon: "arrow.up.circle.fill",
+            size: 28,
+            backgroundColor: BananaTheme.yellow.opacity(0.15),
+            foregroundColor: BananaTheme.yellow.opacity(0.9),
+            isDisabled: isUploading
+        ) {
+            if !isUploading {
+                onUpload()
+            }
+        }
+        .overlay(
+            isUploading
+                ? ProgressView()
+                    .scaleEffect(0.6)
+                    .tint(BananaTheme.yellow)
+                : nil
+        )
+    }
+    
+    private var cardBackground: some View {
+        RoundedRectangle(cornerRadius: 12)
+            .fill(BananaTheme.cardGradient(isCurrent: isCurrent))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isPlaying ? BananaTheme.yellow.opacity(0.4) : Color.clear, lineWidth: 1.5)
+            )
     }
 }
 
