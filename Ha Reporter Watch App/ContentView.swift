@@ -35,25 +35,6 @@ struct ContentView: View {
                 .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // Top title with banana emoji and recording indicator
-                    HStack(spacing: 4) {
-                        Text("🍌")
-                            .font(.system(size: 14))
-                        if audioRecorder.isRecording {
-                            Circle()
-                                .fill(Color.red)
-                                .frame(width: 5, height: 5)
-                        }
-                        Text("Banana Reporter")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(bananaYellow)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 4)
-                    .padding(.horizontal, 4)
-                    
                     Spacer()
                     
                     // Audio level bars - banana themed
@@ -72,7 +53,7 @@ struct ContentView: View {
                                                     endPoint: .bottom
                                                 )
                                             )
-                                            .frame(width: 10, height: audioLevels[index] * 70 + 25)
+                                            .frame(width: 10, height: audioLevels[index] * 55 + 20)
                                             .shadow(color: bananaYellow.opacity(0.3), radius: 3)
                                             .animation(.easeInOut(duration: 0.3), value: audioLevels[index])
                                         
@@ -80,30 +61,28 @@ struct ContentView: View {
                                         Circle()
                                             .fill(bananaBrown)
                                             .frame(width: 4, height: 4)
-                                            .offset(y: -(audioLevels[index] * 70 + 25) / 2)
+                                            .offset(y: -(audioLevels[index] * 55 + 20) / 2)
                                             .animation(.easeInOut(duration: 0.3), value: audioLevels[index])
                                     }
                                 }
                             }
-                            
-                            Text("🎙️")
-                                .font(.system(size: 20))
-                                .opacity(0.7)
                         }
-                        .padding(.vertical, 20)
+                        .frame(height: 110)
+                        .padding(.vertical, 5)
                     } else if audioRecorder.hasRecording {
                         // Paused state - show banana bunch
-                        VStack(spacing: 8) {
+                        VStack(spacing: 6) {
                             Text("🍌")
-                                .font(.system(size: 50))
+                                .font(.system(size: 44))
                             Text("Paused")
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundStyle(bananaYellow)
                         }
-                        .padding(.vertical, 20)
+                        .frame(height: 110)
+                        .padding(.vertical, 5)
                     } else {
                         // Ready state - show banana with microphone
-                        VStack(spacing: 8) {
+                        VStack(spacing: 6) {
                             ZStack {
                                 Circle()
                                     .fill(
@@ -111,39 +90,41 @@ struct ContentView: View {
                                             colors: [bananaYellow.opacity(0.2), Color.clear],
                                             center: .center,
                                             startRadius: 5,
-                                            endRadius: 40
+                                            endRadius: 35
                                         )
                                     )
-                                    .frame(width: 80, height: 80)
+                                    .frame(width: 70, height: 70)
                                 
                                 Text("🍌🎙️")
-                                    .font(.system(size: 40))
+                                    .font(.system(size: 36))
                             }
                             Text("Tap to start")
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(bananaYellow)
                         }
-                        .padding(.vertical, 20)
+                        .frame(height: 110)
+                        .padding(.vertical, 5)
                     }
                     
                     Spacer()
                     
                     // Bottom section with timer and button
-                    HStack(alignment: .center, spacing: 16) {
+                    HStack(alignment: .center, spacing: 8) {
                         // Timer with banana theme
-                        HStack(spacing: 4) {
+                        HStack(spacing: 2) {
                             Text(audioRecorder.formattedTime)
-                                .font(.system(size: 32, weight: .bold, design: .rounded))
+                                .font(.system(size: 26, weight: .bold, design: .rounded))
                                 .monospacedDigit()
                                 .foregroundStyle(bananaYellow)
+                                .minimumScaleFactor(0.6)
+                                .lineLimit(1)
                             if audioRecorder.isRecording {
                                 Circle()
                                     .fill(Color.red)
-                                    .frame(width: 8, height: 8)
+                                    .frame(width: 7, height: 7)
                             }
                         }
-                        
-                        Spacer()
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         
                         // Banana-themed stop button
                         Button(action: {
@@ -153,8 +134,8 @@ struct ContentView: View {
                                 // Outer glow
                                 Circle()
                                     .fill(bananaYellow.opacity(0.3))
-                                    .frame(width: 56, height: 56)
-                                    .blur(radius: 4)
+                                    .frame(width: 48, height: 48)
+                                    .blur(radius: 3)
                                 
                                 // Button background
                                 Circle()
@@ -168,7 +149,7 @@ struct ContentView: View {
                                             endPoint: .bottomTrailing
                                         )
                                     )
-                                    .frame(width: 50, height: 50)
+                                    .frame(width: 44, height: 44)
                                     .overlay(
                                         Circle()
                                             .stroke(bananaYellow.opacity(0.5), lineWidth: 2)
@@ -177,7 +158,7 @@ struct ContentView: View {
                                 // Stop icon (banana styled)
                                 RoundedRectangle(cornerRadius: 3)
                                     .fill(bananaYellow)
-                                    .frame(width: 18, height: 18)
+                                    .frame(width: 15, height: 15)
                                     .shadow(color: bananaYellow.opacity(0.5), radius: 2)
                             }
                         }
@@ -192,50 +173,58 @@ struct ContentView: View {
                         )
                         .disabled(audioRecorder.isUploading)
                     }
-                    .padding(.bottom, 16)
-                    .padding(.horizontal, 8)
+                    .padding(.bottom, 8)
+                    .padding(.horizontal, 10)
                     
                     // Status messages with banana theme
                     if audioRecorder.isUploading {
-                        VStack(spacing: 4) {
+                        VStack(spacing: 3) {
                             ProgressView()
                                 .progressViewStyle(.circular)
                                 .tint(bananaYellow)
-                                .scaleEffect(0.8)
+                                .scaleEffect(0.7)
                             HStack(spacing: 2) {
                                 Text("🍌")
-                                    .font(.system(size: 12))
+                                    .font(.system(size: 11))
                                 Text("Uploading...")
-                                    .font(.system(size: 12, weight: .medium))
+                                    .font(.system(size: 11, weight: .medium))
                                     .foregroundStyle(bananaYellow)
                             }
                         }
-                        .frame(height: 40)
+                        .frame(height: 32)
+                        .padding(.bottom, 8)
                     } else if let message = audioRecorder.uploadMessage {
-                        HStack(spacing: 4) {
+                        HStack(spacing: 3) {
                             Image(systemName: audioRecorder.uploadSuccess ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                .font(.system(size: 12))
+                                .font(.system(size: 11))
                             Text(message)
-                                .font(.system(size: 12, weight: .medium))
+                                .font(.system(size: 11, weight: .medium))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                             if audioRecorder.uploadSuccess {
                                 Text("🎉")
-                                    .font(.system(size: 12))
+                                    .font(.system(size: 11))
                             }
                         }
                         .foregroundStyle(audioRecorder.uploadSuccess ? bananaYellow : .red)
-                        .frame(height: 40)
+                        .frame(height: 32)
+                        .padding(.bottom, 8)
                     } else if audioRecorder.hasRecording && audioRecorder.isCurrentRecordingTooSmall() {
                         HStack(spacing: 2) {
                             Text("⚠️")
-                                .font(.system(size: 12))
+                                .font(.system(size: 11))
                             Text("Record more (min 50 KB)")
-                                .font(.system(size: 11, weight: .medium))
+                                .font(.system(size: 10, weight: .medium))
                                 .foregroundStyle(.orange)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                         }
-                        .frame(height: 40)
+                        .frame(height: 32)
+                        .padding(.bottom, 8)
                     } else {
                         Color.clear
-                            .frame(height: 40)
+                            .frame(height: 32)
+                            .padding(.bottom, 8)
                     }
                 }
             }
