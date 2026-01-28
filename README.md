@@ -27,8 +27,12 @@ A beautiful, intuitive watchOS audio recording app with real-time visualization 
 - **File information** - Duration and size at a glance
 - **Current vs. Saved** - Clear visual separation
 
-### ☁️ Cloud Integration
+### ☁️ Cloud Integration & AI Transcription
 - **Automatic upload to Dify.ai** - Seamless cloud storage
+- **AI-powered transcription** - Gemini 3 Flash for accurate text conversion
+- **Speaker detection** - Automatically distinguishes different speakers
+- **Timestamp generation** - Precise timing for each speech segment
+- **Markdown formatting** - Clean, structured output
 - **Upload progress** - Real-time feedback
 - **Success/failure notifications** - Clear status messages
 - **Batch operations** - Delete all recordings at once
@@ -38,17 +42,6 @@ A beautiful, intuitive watchOS audio recording app with real-time visualization 
 - **Dark mode optimized** - Beautiful gradient backgrounds
 - **Smooth animations** - Polished, professional feel
 - **Apple Watch native** - Designed specifically for watchOS
-
-## 📱 Screenshots
-
-<div align="center">
-
-| Recording | Paused | Recordings List |
-|-----------|--------|-----------------|
-| ![Recording](docs/recording.png) | ![Paused](docs/paused.png) | ![List](docs/list.png) |
-| Real-time audio visualization | Pause state with banana | Playback and management |
-
-</div>
 
 ## 🏗️ Architecture
 
@@ -83,6 +76,65 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 - watchOS 10.0+
 - Apple Watch (any model)
 - macOS 14.0+ (for development)
+- Dify.ai account (for cloud transcription)
+
+### ⚠️ Security Notice
+
+**IMPORTANT**: This project currently contains a hardcoded API key in the source code. This is **NOT SAFE** for production use.
+
+```swift
+// ❌ NOT SAFE - Hardcoded API key
+private let apiKey = "app-ucSda6dZimrDkoYlD51IpKIS"
+```
+
+**Before using this app:**
+1. ✅ Follow the setup instructions below to get your own API key
+2. ✅ Replace the hardcoded key in the source code
+3. ✅ Never commit API keys to version control
+4. ✅ Consider using environment variables or secure storage
+
+### Dify Workflow Setup
+
+This app uses a Dify.ai workflow for audio transcription. The workflow (`Ha Reporter.yml`) transcribes audio with speaker detection and timestamps.
+
+#### 1. Import the Workflow
+
+1. Go to [Dify.ai](https://dify.ai) and sign in
+2. Navigate to **Studio** → **Import DSL**
+3. Upload the `Ha Reporter.yml` file from this repository
+4. The workflow will be imported with:
+   - Audio file input
+   - Gemini 3 Flash for transcription
+   - Speaker detection (Speaker A, B, etc.)
+   - Timestamp formatting
+   - Markdown output
+
+#### 2. Get Your API Key
+
+1. Open the imported workflow in Dify
+2. Click **Publish** button (top right)
+3. Click **Run** or **API** tab
+4. Copy your **API Key** (starts with `app-...`)
+5. Copy the **Workflow Endpoint URL**
+
+#### 3. Configure the App
+
+Edit `AudioRecorderViewModel.swift` and replace:
+
+```swift
+// Replace with YOUR API key from Dify
+private let apiKey = "YOUR_API_KEY_HERE"
+
+// Replace with YOUR workflow endpoint
+private let uploadEndpoint = "https://api.dify.ai/v1/files/upload"
+private let workflowEndpoint = "YOUR_WORKFLOW_ENDPOINT_HERE"
+```
+
+**Example:**
+```swift
+private let apiKey = "app-ABC123xyz..."  // Your actual key
+private let workflowEndpoint = "https://api.dify.ai/v1/workflows/run"
+```
 
 ### Installation
 
@@ -92,14 +144,15 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
    cd ha-reporter
    ```
 
-2. **Open in Xcode**
+2. **Setup Dify Workflow** (Required)
+   - Follow the **Dify Workflow Setup** instructions above
+   - Import `Ha Reporter.yml` to your Dify account
+   - Get your API key and configure the app
+
+3. **Open in Xcode**
    ```bash
    open "Ha Reporter.xcodeproj"
    ```
-
-3. **Configure Dify.ai API** (Optional)
-   - Open `AudioRecorderViewModel.swift`
-   - Replace `apiKey` and endpoints with your Dify.ai credentials
 
 4. **Build and Run**
    - Select your Apple Watch as the target device
@@ -109,13 +162,10 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 
 ### API Setup
 
-Edit `AudioRecorderViewModel.swift` to configure your cloud storage:
-
-```swift
-private let apiKey = "your-api-key-here"
-private let uploadEndpoint = "https://api.dify.ai/v1/files/upload"
-private let workflowEndpoint = "https://api.dify.ai/v1/workflows/run"
-```
+⚠️ **See "Dify Workflow Setup" section above for detailed instructions on:**
+- Importing the workflow
+- Getting your API key
+- Configuring the app securely
 
 ### Recording Settings
 
@@ -178,6 +228,17 @@ Select watchOS Simulator and press cmd + R
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture & design patterns
 - [REFACTORING_SUMMARY.md](REFACTORING_SUMMARY.md) - Code refactoring report
 - [PLAYBACK_GUIDE.md](Ha%20Reporter%20Watch%20App/PLAYBACK_GUIDE.md) - Audio playback documentation
+- [Ha Reporter.yml](Ha%20Reporter.yml) - Dify workflow configuration (import this!)
+
+## 📦 Project Files
+
+- **`Ha Reporter.yml`** - Dify workflow for AI transcription
+  - Audio to text conversion
+  - Speaker detection
+  - Timestamp generation
+  - Markdown output formatting
+- **`LICENSE`** - MIT License
+- **`.gitignore`** - iOS/watchOS development exclusions
 
 ## 🤝 Contributing
 

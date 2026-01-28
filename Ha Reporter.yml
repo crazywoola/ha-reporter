@@ -1,0 +1,365 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: Ha Reporter
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/gemini:0.7.4@5faf411e694e0da130a337347a625a3812b1b7502a0183382d66d92c841bf05a
+    version: null
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai:0.2.8@aae2be0913b8c6f0b80cff58e08d7a8b4c214569b41778413fcaea204561ff16
+    version: null
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 50
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: llm
+      id: 1769500954464-source-1769500964865-target
+      source: '1769500954464'
+      sourceHandle: source
+      target: '1769500964865'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: 1769500964865-source-1769501756777-target
+      source: '1769500964865'
+      sourceHandle: source
+      target: '1769501756777'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: end
+      id: 1769502730975-source-1769500979469-target
+      source: '1769502730975'
+      sourceHandle: source
+      target: '1769500979469'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: template-transform
+      id: 1769501756777-source-1769502863697-target
+      source: '1769501756777'
+      sourceHandle: source
+      target: '1769502863697'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: template-transform
+        targetType: http-request
+      id: 1769502863697-source-1769502730975-target
+      source: '1769502863697'
+      sourceHandle: source
+      target: '1769502730975'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: User Input
+        type: start
+        variables:
+        - allowed_file_extensions: []
+          allowed_file_types:
+          - audio
+          allowed_file_upload_methods:
+          - local_file
+          - remote_url
+          default: ''
+          hint: ''
+          label: audio
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: file
+          variable: audio
+      height: 109
+      id: '1769500954464'
+      position:
+        x: 0
+        y: 30
+      positionAbsolute:
+        x: 0
+        y: 30
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gemini-3-flash-preview
+          provider: langgenius/gemini/google
+        prompt_template:
+        - id: 25c8fbd3-824e-4d4c-a86d-6cd6d80525b9
+          role: system
+          text: ''
+        - id: e85c91a4-a041-4415-8064-52f765cccf03
+          role: user
+          text: '{{#1769500954464.audio#}}
+
+            请将此音频转为文字，并遵循以下要求：
+
+
+            1.  **区分说话人**：用“说话人 A”、“说话人 B”等方式标记不同的说话者。
+
+            2.  **包含时间戳**：在每段对话的开头，使用 `[HH:MM:SS]` 格式标注时间戳。
+
+            3.  **使用 Markdown 格式**：请将最终结果整理成清晰的 Markdown 格式。
+
+
+            **输出示例：**
+
+            ```markdown
+
+            [00:00:00] 说话人 A: 你好。
+
+            [00:00:02] 说话人 B: 你好，请问有什么可以帮您？
+
+            ```'
+        selected: false
+        title: LLM
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1769500964865'
+      position:
+        x: 344.8571428571429
+        y: 51
+      positionAbsolute:
+        x: 344.8571428571429
+        y: 51
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        outputs:
+        - value_selector:
+          - '1769502863697'
+          - output
+          value_type: string
+          variable: text
+        selected: false
+        title: Output
+        type: end
+      height: 88
+      id: '1769500979469'
+      position:
+        x: 685.4285714285716
+        y: 280.8571428571429
+      positionAbsolute:
+        x: 685.4285714285716
+        y: 280.8571428571429
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1769500964865'
+          - text
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4.1-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 1314bc1f-42ff-4245-b13d-b557e1cf551d
+          role: system
+          text: '{{#context#}}'
+        - id: 2b073ce5-0cfd-4aa0-950a-4dd217a54b48
+          role: user
+          text: 按照内容拆分提取双方核心诉求，最后进行总结，输出为 md
+        selected: false
+        title: LLM 2
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1769501756777'
+      position:
+        x: 685.4285714285716
+        y: 51
+      positionAbsolute:
+        x: 685.4285714285716
+        y: 51
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - id: key-value-67
+            key: ''
+            type: text
+            value: '{"msg_type":"text","content":{"text":"{{#1769502863697.output#}}"}}'
+          type: json
+        headers: ''
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: HTTP Request
+        type: http-request
+        url: https://open.feishu.cn/open-apis/bot/v2/hook/996af39a-2eeb-4b22-80cb-a0cb07950e1a
+        variables: []
+      height: 169
+      id: '1769502730975'
+      position:
+        x: 328.57142857142844
+        y: 291.42857142857144
+      positionAbsolute:
+        x: 328.57142857142844
+        y: 291.42857142857144
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        selected: false
+        template: '## Timeline
+
+
+          {{ timeline }}
+
+
+          ## Keynotes
+
+
+          {{ keynotes }}'
+        title: Template
+        type: template-transform
+        variables:
+        - value_selector:
+          - '1769500964865'
+          - text
+          value_type: string
+          variable: timeline
+        - value_selector:
+          - '1769501756777'
+          - text
+          value_type: string
+          variable: keynotes
+      height: 52
+      id: '1769502863697'
+      position:
+        x: 1007.4285714285713
+        y: 51
+      positionAbsolute:
+        x: 1007.4285714285713
+        y: 51
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: 258.5999999999999
+      y: 138
+      zoom: 0.7
+  rag_pipeline_variables: []
