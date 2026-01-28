@@ -35,23 +35,33 @@ struct RecordingFilesView: View {
                 VStack(spacing: 16) {
                     // Upload status banner
                     if let message = audioRecorder.uploadMessage {
-                        HStack(spacing: 4) {
-                            if audioRecorder.isUploading {
-                                ProgressView()
-                                    .scaleEffect(0.6)
-                                    .tint(bananaYellow)
-                            } else {
-                                Image(systemName: audioRecorder.uploadSuccess ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(audioRecorder.uploadSuccess ? bananaYellow : .red)
+                        HStack(spacing: 8) {
+                            // Icon aligned with play button
+                            ZStack {
+                                Circle()
+                                    .fill((audioRecorder.uploadSuccess ? bananaYellow : Color.red).opacity(0.2))
+                                    .frame(width: 32, height: 32)
+                                
+                                if audioRecorder.isUploading {
+                                    ProgressView()
+                                        .scaleEffect(0.6)
+                                        .tint(bananaYellow)
+                                } else {
+                                    Image(systemName: audioRecorder.uploadSuccess ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(audioRecorder.uploadSuccess ? bananaYellow : .red)
+                                }
                             }
                             
                             Text(message)
                                 .font(.system(size: 11, weight: .medium))
                                 .foregroundStyle(audioRecorder.uploadSuccess ? bananaYellow : .red)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            Spacer()
                         }
-                        .padding(.vertical, 6)
                         .padding(.horizontal, 10)
+                        .padding(.vertical, 8)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
                                 .fill((audioRecorder.uploadSuccess ? bananaYellow : Color.red).opacity(0.15))
@@ -252,23 +262,13 @@ struct RecordingRow: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     
-                    // File size and date
-                    HStack(spacing: 4) {
-                        if let size = try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize {
-                            Text(formatFileSize(size))
-                                .font(.system(size: 9, weight: .medium))
-                                .foregroundStyle(.gray)
-                        }
-                        
-                        Text("•")
-                            .font(.system(size: 8))
-                            .foregroundStyle(.gray.opacity(0.5))
-                        
-                        Text(extractTime(from: url.lastPathComponent))
+                    // File size
+                    if let size = try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize {
+                        Text(formatFileSize(size))
                             .font(.system(size: 9, weight: .medium))
                             .foregroundStyle(.gray)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
                 Spacer()
@@ -390,19 +390,6 @@ struct RecordingRow: View {
         let minutes = Int(time) / 60
         let seconds = Int(time) % 60
         return String(format: "%d:%02d", minutes, seconds)
-    }
-    
-    private func extractTime(from filename: String) -> String {
-        // Extract time from filename like "2024-01-28_14-30-45.m4a"
-        let components = filename.replacingOccurrences(of: ".m4a", with: "").split(separator: "_")
-        if components.count >= 2 {
-            let timeString = String(components[1])
-            let timeParts = timeString.split(separator: "-")
-            if timeParts.count == 3 {
-                return "\(timeParts[0]):\(timeParts[1])"
-            }
-        }
-        return "Recording"
     }
 }
 
