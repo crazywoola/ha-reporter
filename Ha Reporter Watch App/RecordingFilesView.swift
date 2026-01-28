@@ -59,11 +59,10 @@ struct RecordingFilesView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.top, 8)
-                    }
                 }
-                .padding(.vertical, 8)
-                .padding(.horizontal, 4)
             }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 4)
         }
         .bananaBackground()
         .navigationTitle("Recordings")
